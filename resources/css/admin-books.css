@@ -1,0 +1,105 @@
+/* public/css/admin-books.css */
+
+/* Ensure the container has proper padding */
+.container-fluid {
+    padding: 20px;
+}
+
+/* Style the heading */
+h1 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Style the Add New Book button */
+.btn-primary {
+    transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: #005f99;
+}
+
+/* Style the card */
+.card {
+    border: none;
+    border-radius: 8px;
+}
+
+/* Style the table */
+.table {
+    background-color: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+    padding: 12px;
+}
+
+.table thead th {
+    background-color: #343a40;
+    color: #fff;
+    font-weight: 500;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Style action buttons */
+.action-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.875rem;
+}
+
+.btn-warning {
+    background-color: #f0ad4e;
+    border-color: #f0ad4e;
+}
+
+.btn-warning:hover {
+    background-color: #ec971f;
+    border-color: #ec971f;
+}
+
+.btn-danger {
+    background-color: #d9534f;
+    border-color: #d9534f;
+}
+
+.btn-danger:hover {
+    background-color: #c9302c;
+    border-color: #c9302c;
+}
+
+/* Style the delete form */
+.delete-form {
+    display: inline-block;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .action-buttons {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .btn-sm {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    .btn-sm:last-child {
+        margin-bottom: 0;
+    }
+}

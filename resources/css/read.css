@@ -1,0 +1,55 @@
+/* PDF Viewer Protection Styles */
+.pdf-viewer-container {
+    position: relative;
+    width: 100%;
+    height: 80vh;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+}
+
+.pdf-viewer-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* Hide PDF.js controls */
+.no-download #toolbarContainer,
+.no-download #secondaryToolbar {
+    display: none !important;
+}
+
+.no-download .toolbarButton#download,
+.no-download #download {
+    display: none !important;
+}
+
+.no-download .toolbarButton#print,
+.no-download #print {
+    display: none !important;
+}
+
+.no-download #contextDownload {
+    display: none !important;
+}
+
+/* Disable text selection */
+.pdf-protected {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Hide download buttons in all browsers */
+::-webkit-download-button {
+    display: none !important;
+}
+
+/* Hide print dialog buttons */
+@media print {
+    body {
+        display: none !important;
+    }
+}
