@@ -43,7 +43,6 @@ use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 //use App\Http\Controllers\Admin\AdminTransactionController;
 use App\Http\Controllers\LibraryController;
-use App\Http\Controllers\Admin\AdminMessageController;
 use App\Http\Controllers\UserMessageController;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Http\Controllers\Admin\Borrow;
@@ -51,7 +50,7 @@ use App\Http\Controllers\ReportsController;
 use App\Http\Controllers\FinesController;
 //use App\Http\Controllers\PaymentsController;
 use App\Http\Controllers\Admin\PaymentsController;
-
+use App\Http\Controllers\ContactController;
 
 
 
@@ -72,6 +71,32 @@ use App\Http\Controllers\Admin\PaymentsController;
 */
 // routes/web.php
 
+
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::get('/messages', [MessageController::class, 'index'])->name('admin.messages.index');
+    Route::post('/messages', [MessageController::class, 'store'])->name('admin.messages.store');
+    Route::delete('/messages/{id}', [MessageController::class, 'destroy'])->name('admin.messages.destroy');
+});
+
+Route::prefix('user')->middleware(['auth'])->group(function () {
+    Route::get('/messages', [UserMessageController::class, 'index'])->name('user.messages.index');
+    Route::post('/messages', [UserMessageController::class, 'store'])->name('user.messages.store');
+    Route::get('/messages/{id}/read', [UserMessageController::class, 'read'])->name('user.messages.read');
+});
+
+
+Route::get('/pages/contact', [ContactController::class, 'submit'])->name('pages.contact');
+
+Route::get('/', function () {
+   return view('welcome');
+})->name('welcome');
+Route::post('/contact/submit', [ContactController::class, 'submit'])->name('contact.submit');
+Route::view('/about', 'pages.about');
+Route::view('/contact', 'pages.contact');
+Route::view('/blog', 'pages.blog');
+Route::view('/privacy', 'pages.privacy');
+Route::view('/term', 'pages.term');
+Route::view('/welcome', 'pages.welcome');
 
 
 Route::middleware('auth')->group(function () {
@@ -110,8 +135,14 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get('/user/dashboard', [UserDashboardController::class, 'index'])->name('user.dashboard');
 
- Route::get('/import-users', [UserController::class, 'showImportForm'])->name('admin.users.import.form');
-    Route::post('/import-users', [UserController::class, 'import'])->name('admin.users.import');
+ //Route::get('/import-users', [UserController::class, 'showImportForm'])->name('admin.users.import.form');
+   // Route::post('/import-users', [UserController::class, 'import'])->name('admin.users.import');
+   Route::prefix('admin')->group(function () {
+    Route::get('users/import', [ControllerA::class, 'import'])->name('admin.users.import');
+});
+Route::prefix('admin')->group(function () {
+    Route::post('users/import', [ControllerB::class, 'process'])->name('admin.users.import');
+});
     
 
     Route::get('/admin/users/template', function () {
@@ -147,12 +178,6 @@ Route::middleware('auth:web')->group(function () {
 // Admin routes
 Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
 Route::get('/admin/books/borrowed', [BookController::class, 'borrowed'])->name('admin.books.borrowed');
-
-Route::prefix('admin/messages')->name('admin.messages.')->group(function () {
-    Route::get('/', [AdminMessageController::class, 'index'])->name('index');
-    Route::post('messages', [AdminMessageController::class, 'store'])->name('store');
-    Route::delete('/{id}', [AdminMessageController::class, 'destroy'])->name('destroy');
-});
 
 // User routes
 Route::post('/books/{borrow}/return', [BooksController::class, 'return'])->name('books.return');
@@ -284,7 +309,7 @@ Route::middleware(['auth'])->group(function () {
 
 Route::get('/admin/books/returned', [BookController::class, 'adminReturnedBooks'])->name('admin.books.returned');
 // Public Routes
-Route::get('/', fn () => view('welcome'))->name('home');
+//Route::get('/', fn () => view('welcome'))->name('home');
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 //Route::post('/logout', [LoginController::class, 'logout'])->name('logout');

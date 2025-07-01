@@ -28,9 +28,9 @@ class BookController extends Controller
                         ->orWhereHas('category', function ($q) use ($search) {
                             $q->where('name', 'like', "%{$search}%");
                         });
-        })->with('category')->paginate(12); // Paginate with 12 books per page
+        })->with('category')->paginate(12);
 
-        $totalBooks = Book::count(); // Calculate total number of books
+        $totalBooks = Book::count();
 
         return view('admin.books.index', compact('books', 'totalBooks'));
     }
@@ -50,7 +50,7 @@ class BookController extends Controller
                 'isbn' => 'required|string|max:13|unique:books,isbn',
                 'category_id' => 'required|exists:categories,id',
                 'description' => 'nullable|string',
-                'book_file' => 'nullable|file|mimes:pdf|max:10000',
+                'book_file' => 'nullable|file|mimes:pdf,txt,epub|max:10000', // Updated to allow .pdf, .txt, .epub
                 'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
             ]);
 
@@ -81,6 +81,7 @@ class BookController extends Controller
                     'isbn' => $book->isbn,
                     'category_id' => $book->category_id,
                     'cover_image_path' => $book->cover_image_path,
+                    'file_path' => $book->file_path,
                 ]),
                 'ip_address' => $request->ip(),
                 'platform' => $agent->platform() ?? 'Unknown',
@@ -99,8 +100,23 @@ class BookController extends Controller
 
     public function edit(Book $book)
     {
-        $categories = Category::orderBy('name')->get();
-        return view('admin.books.edit', compact('book', 'categories'));
+        try {
+            $categories = Category::orderBy('name')->get();
+
+            // Log file paths to debug visibility issues
+            Log::info('Editing book: ' . $book->title, [
+                'book_id' => $book->id,
+                'file_path' => $book->file_path,
+                'file_exists' => $book->file_path ? Storage::disk('public')->exists($book->file_path) : false,
+                'cover_image_path' => $book->cover_image_path,
+                'cover_exists' => $book->cover_image_path ? Storage::disk('public')->exists($book->cover_image_path) : false,
+            ]);
+
+            return view('admin.books.edit', compact('book', 'categories'));
+        } catch (\Exception $e) {
+            Log::error('Error loading edit form for book: ' . $book->title . ' | Error: ' . $e->getMessage());
+            return redirect()->route('admin.books.index')->with('error', 'Failed to load edit form: ' . $e->getMessage());
+        }
     }
 
     public function update(Request $request, Book $book)
@@ -112,24 +128,41 @@ class BookController extends Controller
                 'isbn' => 'required|string|max:13|unique:books,isbn,' . $book->id,
                 'category_id' => 'required|exists:categories,id',
                 'description' => 'nullable|string',
-                'book_file' => 'nullable|file|mimes:pdf|max:10000',
+                'book_file' => 'nullable|file|mimes:pdf,txt,epub|max:10000', // Updated to allowоси allow .pdf, .txt, .epub
                 'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:4096',
             ]);
 
+            // Log current state before update
+            Log::info('Updating book: ' . $book->title, [
+                'book_id' => $book->id,
+                'current_file_path' => $book->file_path,
+                'current_cover_image_path' => $book->cover_image_path,
+            ]);
+
             if ($request->hasFile('book_file')) {
-                if ($book->file_path) {
+                if ($book->file_path && Storage::disk('public')->exists($book->file_path)) {
                     Storage::disk('public')->delete($book->file_path);
+                    Log::info('Deleted old book file: ' . $book->file_path);
+                } elseif ($book->file_path) {
+                    Log::warning('Old book file not found or invalid: ' . $book->file_path);
                 }
                 $validated['file_path'] = $request->file('book_file')->store('books', 'public');
                 Log::info('Book file updated: ' . $validated['file_path']);
+            } else {
+                $validated['file_path'] = $book->file_path;
             }
 
             if ($request->hasFile('cover_image')) {
-                if ($book->cover_image_path) {
+                if ($book->cover_image_path && Storage::disk('public')->exists($book->cover_image_path)) {
                     Storage::disk('public')->delete($book->cover_image_path);
+                    Log::info('Deleted old cover image: ' . $book->cover_image_path);
+                } elseif ($book->cover_image_path) {
+                    Log::warning('Old cover image not found or invalid: ' . $book->cover_image_path);
                 }
                 $validated['cover_image_path'] = $request->file('cover_image')->store('book_covers', 'public');
                 Log::info('Cover image updated: ' . $validated['cover_image_path']);
+            } else {
+                $validated['cover_image_path'] = $book->cover_image_path;
             }
 
             $book->update($validated);
@@ -147,6 +180,7 @@ class BookController extends Controller
                     'isbn' => $book->isbn,
                     'category_id' => $book->category_id,
                     'cover_image_path' => $book->cover_image_path,
+                    'file_path' => $book->file_path,
                 ]),
                 'ip_address' => $request->ip(),
                 'platform' => $agent->platform() ?? 'Unknown',
@@ -166,11 +200,13 @@ class BookController extends Controller
     public function destroy(Book $book)
     {
         try {
-            if ($book->file_path) {
+            if ($book->file_path && Storage::disk('public')->exists($book->file_path)) {
                 Storage::disk('public')->delete($book->file_path);
+                Log::info('Deleted book file: ' . $book->file_path);
             }
-            if ($book->cover_image_path) {
+            if ($book->cover_image_path && Storage::disk('public')->exists($book->cover_image_path)) {
                 Storage::disk('public')->delete($book->cover_image_path);
+                Log::info('Deleted cover image: ' . $book->cover_image_path);
             }
 
             $bookTitle = $book->title;
@@ -189,6 +225,7 @@ class BookController extends Controller
                     'isbn' => $book->isbn,
                     'category_id' => $book->category_id,
                     'cover_image_path' => $book->cover_image_path,
+                    'file_path' => $book->file_path,
                 ]),
                 'ip_address' => request()->ip(),
                 'platform' => $agent->platform() ?? 'Unknown',
@@ -221,6 +258,7 @@ class BookController extends Controller
                     'isbn' => $book->isbn,
                     'category_id' => $book->category_id,
                     'cover_image_path' => $book->cover_image_path,
+                    'file_path' => $book->file_path,
                 ]),
                 'ip_address' => request()->ip(),
                 'platform' => $agent->platform() ?? 'Unknown',
@@ -255,20 +293,21 @@ class BookController extends Controller
 
         try {
             Excel::import(new BooksImport, $request->file('excel_file'));
+            Log::info('Books imported successfully from file: ' . $request->file('excel_file')->getClientOriginalName());
             return redirect()->route('admin.books.index')->with('success', 'Books imported successfully.');
         } catch (\Exception $e) {
+            Log::error('Error importing books: ' . $e->getMessage());
             return redirect()->back()->with('error', 'Error importing books: ' . $e->getMessage());
         }
     }
 
     public function borrowed()
     {
-        // Fetch all borrow records with related book and user data
         $borrows = Borrow::with(['book', 'user'])
             ->latest('borrowed_at')
             ->get();
 
-        \Log::info('Borrowed books fetched', ['count' => $borrows->count()]);
+        Log::info('Borrowed books fetched', ['count' => $borrows->count()]);
 
         return view('admin.books.borrowed', compact('borrows'));
     }
@@ -280,7 +319,7 @@ class BookController extends Controller
             ->latest('borrowed_at')
             ->get();
 
-        \Log::info('Issued books fetched', ['count' => $borrows->count()]);
+        Log::info('Issued books fetched', ['count' => $borrows->count()]);
 
         return view('admin.books.issued', compact('borrows'));
     }
@@ -293,7 +332,7 @@ class BookController extends Controller
             ->latest('borrowed_at')
             ->get();
 
-        \Log::info('Overdue books fetched', ['count' => $borrows->count()]);
+        Log::info('Overdue books fetched', ['count' => $borrows->count()]);
 
         return view('admin.books.overdue', compact('borrows'));
     }

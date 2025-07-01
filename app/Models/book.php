@@ -60,10 +60,11 @@ class Book extends Model
      *
      * @return string
      */
-    public function getReadingUrlAttribute()
-    {
-        return route('user.books.read', $this->id);
-    }
+   public function getReadingUrlAttribute()
+{
+    return $this->id ? route('user.books.read', ['id' => $this->id]) : '#';
+}
+
 
     /**
      * Relationships

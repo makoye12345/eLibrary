@@ -1,209 +1,266 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to Library Management System</title>
-    <link rel="icon" type="image/x-ico" href="{{ asset('favicon.ico') }}">
+@extends('layouts.app')
 
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
+@section('title', 'Home')
+
+@section('content')
+    <!-- Hero Section -->
+    <section class="hero-bg h-screen flex items-center justify-center text-white text-center relative overflow-hidden" data-aos="fade-up" data-aos-duration="1000">
+        <div class="slideshow-container">
+            <div class="slide">
+                <img src="{{ asset('images/book4.jpg') }}" alt="Hero Image 1" class="w-full h-full object-cover absolute top-0 left-0">
+            </div>
+            <div class="slide">
+                <img src="{{ asset('images/book3.jpg') }}" alt="Hero Image 2" class="w-full h-full object-cover absolute top-0 left-0">
+            </div>
+            <div class="slide">
+                <img src="{{ asset('images/book1.jpg') }}" alt="Hero Image 3" class="w-full h-full object-cover absolute top-0 left-0">
+            </div>
+        </div>
+        <div class="container mx-auto px-4 relative z-10">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">Welcome to eLibrary</h1>
+            <p class="text-xl md:text-2xl mb-8">Manage your reading with our advanced Library Management System, offering digital access, reservations, and community events.</p>
+            <a href="/login" class="bg-blue-500 text-white px-8 py-4 rounded-full hover:bg-blue-600 transition text-lg">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-gray-800 text-center mb-12" data-aos="fade-up" data-aos-duration="500">Our Library Services</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-aos="fade-up" data-aos-duration="500">
+                <div class="bg-gray-50 p-6 rounded-lg shadow-lg card-hover">
+                    <img src="{{ asset('images/book3.jpg') }}" alt="Digital Catalog" class="w-full h-48 object-cover rounded-t-lg mb-4">
+                    <h3 class="text-2xl font-semibold mb-2">Digital Catalog Access</h3>
+                    <p class="text-gray-600">Search and access thousands of e-books and resources via our LMS.</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('service-1-content', this)">Read More</a>
+                    <div id="service-1-content" class="expanded-content text-gray-600 mt-4">
+                        <p>Our Library Management System provides a comprehensive digital catalog with over 10,000 e-books, audiobooks, and research papers. Search by title, author, or genre, and access resources instantly through your user account. Features include full-text search, bookmarking, and offline reading capabilities.</p>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-lg card-hover">
+                    <img src="{{ asset('images/bookk.jpeg') }}" alt="Book Borrowing" class="w-full h-48 object-cover rounded-t-lg mb-4">
+                    <h3 class="text-2xl font-semibold mb-2">Book Borrowing & Tracking</h3>
+                    <p class="text-gray-600">Borrow and track books seamlessly with our LMS.</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('service-2-content', this)">Read More</a>
+                    <div id="service-2-content" class="expanded-content text-gray-600 mt-4">
+                        <p>Reserve physical or digital books through our LMS and track borrowing status in real-time. Receive notifications for due dates, renewals, and availability. Our system supports holds, waitlists, and automated reminders to ensure a smooth borrowing experience across all library branches.</p>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-lg card-hover">
+                    <img src="{{ asset('images/book12.jpg') }}" alt="Event Management" class="w-full h-48 object-cover rounded-t-lg mb-4">
+                    <h3 class="text-2xl font-semibold mb-2">Event Management</h3>
+                    <p class="text-gray-600">Join and manage library events through our LMS.</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('service-3-content', this)">Read More</a>
+                    <div id="service-3-content" class="expanded-content text-gray-600 mt-4">
+                        <p>Our LMS allows you to browse, register, and manage library events like book clubs, author talks, and workshops. Sync events to your calendar, receive reminders, and connect with other participants. Check out our upcoming event on "The New Frontier" on July 10, 2025!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Books Section -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-gray-800 text-center mb-12" data-aos="fade-up" data-aos-duration="500">Featured Books</h2>
+            <div class="mb-8 max-w-md mx-auto">
+                <input type="text" id="search" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search books...">
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8" data-aos="fade-up" data-aos-duration="500" id="books-grid">
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <img src="{{ asset('images/book43.png') }}" alt="The Great Novel" class="w-full h-64 object-cover rounded-t-lg mb-4">
+                    <h3 class="text-xl font-semibold mb-2">The Great Novel</h3>
+                    <p class="text-gray-600 mb-4">A captivating story available in our LMS.</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('book-1-content', this)">Read More</a>
+                    <div id="book-1-content" class="expanded-content text-gray-600 mt-4">
+                        <p>"The Great Novel" by Jane Author is a tale of adventure and discovery. Borrow it digitally through our LMS or reserve a physical copy. Check availability, place holds, and track your borrowing history via your user account. Available now with full-text search!</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <img src="{{ asset('images/st5.jpg') }}" alt="Science Unveiled" class="w-full h-64 object-cover rounded-t-lg mb-4">
+                    <h3 class="text-xl font-semibold mb-2">Science Unveiled</h3>
+                    <p class="text-gray-600 mb-4">Scientific insights accessible via our LMS.</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('book-2-content', this)">Read More</a>
+                    <div id="book-2-content" class="expanded-content text-gray-600 mt-4">
+                        <p>"Science Unveiled" by Dr. John Scholar explores modern scientific discoveries. Access it instantly through our LMS’s digital catalog, with features like highlighting and note-taking. Reserve a physical copy or check borrowing status in your account.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <img src="{{ asset('images/book4.jpg') }}" alt="History Chronicles" class="w-full h-64 object-cover rounded-t-lg mb-4">
+                    <h3 class="text-xl font-semibold mb-2">History Chronicles</h3>
+                    <p class="text-gray-600 mb-4">Historical epic in our LMS catalog.</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('book-3-content', this)">Read More</a>
+                    <div id="book-3-content" class="expanded-content text-gray-600 mt-4">
+                        <p>"History Chronicles" by Alex Historian brings history to life. Access it digitally via our LMS or reserve a physical copy at your nearest branch. Use your account to track borrowing, renew loans, or join our history book club on July 15, 2025.</p>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg card-hover">
+                    <img src="{{ asset('images/book12.jpg') }}" alt="Mystery Tales" class="w-full h-64 object-cover rounded-t-lg mb-4">
+                    <h3 class="text-xl font-semibold mb-2">Mystery Tales</h3>
+                    <p class="text-gray-600 mb-4">Thrilling mysteries in our LMS.</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('book-4-content', this)">Read More</a>
+                    <div id="book-4-content" class="expanded-content text-gray-600 mt-4">
+                        <p>"Mystery Tales" by Alex Noir offers suspenseful short stories. Borrow it digitally through our LMS or reserve a physical copy. Manage your loans, check due dates, and explore similar titles in our catalog with your user account.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-8">
+                <a href="/blog" class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition">Browse All Books</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-gray-800 text-center mb-12" data-aos="fade-up" data-aos-duration="500">What Our Users Say</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-aos="fade-up" data-aos-duration="500">
+                <div class="bg-gray-50 p-6 rounded-lg shadow-lg card-hover">
+                    <p class="text-gray-600 italic mb-4">"The LMS makes borrowing books so easy!"</p>
+                    <p class="text-gray-800 font-semibold">Deus Demo</p>
+                    <p class="text-gray-500">Student</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('testimonial-1-content', this)">Read More</a>
+                    <div id="testimonial-1-content" class="expanded-content text-gray-600 mt-4">
+                        <p>As a student, I love how the LMS lets me search for textbooks, check availability, and borrow digitally or physically. The real-time tracking and renewal options are fantastic, and the note-taking feature helps me study efficiently!</p>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-lg card-hover">
+                    <p class="text-gray-600 italic mb-4">"Event management in the LMS is seamless!"</p>
+                    <p class="text-gray-800 font-semibold">Renatus Milazo</p>
+                    <p class="text-gray-500">Book Enthusiast</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('testimonial-2-content', this)">Read More</a>
+                    <div id="testimonial-2-content" class="expanded-content text-gray-600 mt-4">
+                        <p>The LMS’s event management feature is amazing. I registered for a book club on "The New Frontier" through my account and got calendar reminders. The platform makes it easy to connect with other readers and stay updated on library events.</p>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-6 rounded-lg shadow-lg card-hover">
+                    <p class="text-gray-600 italic mb-4">"Digital access via the LMS is a game-changer."</p>
+                    <p class="text-gray-800 font-semibold">Mary Nkwame</p>
+                    <p class="text-gray-500">Researcher</p>
+                    <a href="#!" class="text-blue-500 hover:underline read-more mt-4 block" onclick="toggleContent('testimonial-3-content', this)">Read More</a>
+                    <div id="testimonial-3-content" class="expanded-content text-gray-600 mt-4">
+                        <p>As a researcher, I rely on the LMS for instant access to journals and e-books. The full-text search and annotation tools are invaluable, and reserving physical books for pickup is effortless. The LMS has streamlined my research process!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter Signup -->
+    <section class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-4xl font-bold text-gray-800 mb-6" data-aos="fade-up" data-aos-duration="500">Stay Updated</h2>
+            <p class="text-lg text-gray-600 mb-8">Subscribe to our newsletter for updates on new books, LMS features, and events.</p>
+            <div class="max-w-md mx-auto">
+                <input type="email" id="newsletter" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4" placeholder="Enter your email">
+                <button onclick="subscribeNewsletter()" class="bg-blue-500 text-white px-6 py-3 rounded-full hover:bg-blue-600 transition w-full">Subscribe</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Call-to-Action Banner -->
+    <section class="py-16 cta-bg text-white text-center">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold mb-6" data-aos="fade-up" data-aos-duration="1000">Join eLibrary Today</h2>
+            <p class="text-xl mb-8">Unlock a world of knowledge with our LMS-powered free membership.</p>
+            <a href="#signup" class="bg-white text-blue-500 px-8 py-4 rounded-full hover:bg-gray-100 transition text-lg">Sign Up Now</a>
+        </div>
+    </section>
+
+    <!-- Styles for Hero Slideshow -->
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
+        /* Hero Slideshow */
+        .hero-bg {
+            position: relative;
+            width: 100%;
+            height: 50vh;
+            overflow: hidden;
         }
+
+        .slideshow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            animation: slideShow 15s infinite;
+        }
+
+        .slide:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .slide:nth-child(2) {
+            animation-delay: 5s;
+        }
+
+        .slide:nth-child(3) {
+            animation-delay: 10s;
+        }
+
+        @keyframes slideShow {
+            0% {
+                opacity: 0;
+                transform: translateX(-100%);
+            }
+            10% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            33.33% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            43.33% {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+
+        /* Ensure text is readable over images */
         
-        .header {
-            background-color: #1e3c72;
-            padding: 20px 0;
-            color: white;
-            text-align: center;
-        }
-        .header img {
-            height: 60px;
-            margin-right: 15px;
-            vertical-align: middle;
-        }
-        .header h1 {
-            display: inline-block;
-            font-size: 2rem;
-            margin: 0;
-            vertical-align: middle;
-            text-align: center;
-        }
-        .navbar {
-            background-color: #2a5298;
-        }
-        .nav-link {
-            color: white !important;
-        }
-        .carousel-inner img {
-            height: 300px;
-            object-fit: cover;
-        }
-        .dashboard-content {
-            padding: 50px 0;
-        }
-        .hero-section {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-        .hero-section h2 {
-            font-size: 2.5rem;
-            color: #1e3c72;
-        }
-        .hero-section p {
-            font-size: 1.2rem;
-            color: #666;
-        }
-        .features-section h3 {
-            text-align: center;
-            margin-bottom: 40px;
-            font-size: 2rem;
-            color: #333;
-        }
-        .feature-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .feature-card h4 {
-            font-size: 1.5rem;
-            color: #2a5298;
-        }
-        .feature-card p {
-            color: #666;
-        }
-        .cta-button {
-            background-color: #2a5298;
-            color: white;
-            padding: 12px 30px;
-            border-radius: 5px;
-            text-decoration: none;
-            font-size: 1.1rem;
-            transition: background-color 0.3s;
-        }
-        .cta-button:hover {
-            background-color: #1e3c72;
-        }
-        footer {
-            background-color: #1e3c72;
-            color: white;
-            text-align: center;
-            padding: 20px 0;
-            margin-top: 50px;
-        }
+        
     </style>
-</head>
-<body>
-    <!-- Header with Logo -->
-    <header class="header">
-        <div class="container">
-            <img  style=" margin-left:-30%"src="{{ asset('images/logo.jpg') }}" alt="Library Logo">
-            <h1>Library Management System</h1>
-        </div>
-    </header>
 
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="container">
-            <div class="d-flex w-100">
-                <!-- Left Side Navigation -->
-               
-                <!-- Right Side Login/Register -->
-                <div class="ms-auto d-flex">
-                    <a class="nav-link px-3" href="{{ route('login') }}">Login</a>
-                    
+    <script>
+        function toggleContent(id, element) {
+            const content = document.getElementById(id);
+            const isExpanded = content.style.display === 'block';
+            content.style.display = isExpanded ? 'none' : 'block';
+            element.textContent = isExpanded ? 'Read More' : 'Read Less';
+        }
 
-                </div>
-            </div>
-        </div>
-    </nav>
+        function subscribeNewsletter() {
+            const email = document.getElementById('newsletter').value;
+            if (email) {
+                alert('Thank you for subscribing!');
+                document.getElementById('newsletter').value = '';
+            } else {
+                alert('Please enter a valid email address.');
+            }
+        }
 
-    <!-- Carousel Section -->
-    <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
-        <div class="carousel-indicators">
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
-            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
-        </div>
-        <div class="carousel-inner">
-            <div class="carousel-item active">
-                <img src="{{ asset('images/book1.jpg') }}" class="d-block w-100" alt="Book 1">
-            </div>
-            <div class="carousel-item">
-                <img src="{{ asset('images/book4.jpg') }}" class="d-block w-100" alt="Book 2">
-            </div>
-            <div class="carousel-item">
-                <img src="{{ asset('images/book3.jpg') }}" class="d-block w-100" alt="Book 3">
-            </div>
-        </div>
-        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
-            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Previous</span>
-        </button>
-        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
-            <span class="carousel-control-next-icon" aria-hidden="true"></span>
-            <span class="visually-hidden">Next</span>
-        </button>
-    </div>
-
-    <!-- Dashboard Content -->
-    <section class="dashboard-content">
-        <div class="container">
-            <!-- Hero Section -->
-            <div class="hero-section">
-                <h2>Welcome to Your Library Dashboard</h2>
-                <p>Explore a world of knowledge with our efficient and user-friendly Library Management System.</p>
-                <a href="{{ route('login') }}" class="cta-button mt-4">Get Started</a>
-            </div>
-
-            <!-- Features Section -->
-            <div class="features-section">
-                <h3>Our Key Features</h3>
-                <div class="row">
-                    <div class="col-md-4">
-                        <div class="feature-card">
-                            <h4>Book Management</h4>
-                            <p>Easily add, update, and track books with details like ISBN, author, and availability.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="feature-card">
-                            <h4>User Management</h4>
-                            <p>Manage library members, their borrowing history, and access permissions seamlessly.</p>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="feature-card">
-                            <h4>Borrowing & Returns</h4>
-                            <p>Automate book issuing and return processes with due date tracking and notifications.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Library Description -->
-    <section class="bg-white shadow-lg rounded-lg p-6 m-4">
-        <h2 class="text-2xl font-semibold mb-4 text-center">About Our Library</h2>
-        <p class="text-gray-700 leading-relaxed text-center">
-            Welcome to our Library Management System, a place where knowledge meets passion. Our library offers a vast collection of books, digital resources, and services designed to inspire learning and creativity. Whether you're a student, researcher, or book enthusiast, our state-of-the-art facilities and dedicated staff are here to support your journey. Explore our curated collections, attend workshops, or simply relax in our cozy reading spaces. Join us today and discover a world of endless possibilities!
-        </p>
-    </section>
-
-    <!-- Footer -->
-    <footer>
-        <p>© {{ date('Y') }} Library Management System. All Rights Reserved.</p>
-    </footer>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+        document.getElementById('search').addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase();
+            document.querySelectorAll('#books-grid .card-hover').forEach(card => {
+                const title = card.querySelector('h3').textContent.toLowerCase();
+                const content = card.querySelector('p:not(.expanded-content p)').textContent.toLowerCase();
+                const expandedContent = card.querySelector('.expanded-content p')?.textContent.toLowerCase() || '';
+                card.style.display = title.includes(searchTerm) || content.includes(searchTerm) || expandedContent.includes(searchTerm) ? 'block' : 'none';
+            });
+        });
+    </script>
+@endsection

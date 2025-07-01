@@ -102,13 +102,19 @@ class DashboardController extends Controller
             });
 
         // Combine and sort activities by created_at, limit to 10 most recent
-        $recentActivities = $newBooks
-            ->merge($newUsers)
-            ->merge($borrowedBooks)
-            ->merge($returnedBooksActivities)
-            ->merge($paidFines)
-            ->sortByDesc('created_at')
-            ->take(10);
+        $newUsers = User::select('id', 'name', 'created_at')
+    ->orderBy('created_at', 'desc')
+    ->take(5)
+    ->get()
+    ->map(function ($user) {
+        return (object) [
+            'id' => $user->id,
+            'type' => 'New User',
+            'description' => "User '{$user->name}' registered",
+            'created_at' => $user->created_at,
+        ];
+    });
+
 
         // Debug: Log variables
         \Log::info('Dashboard variables', [

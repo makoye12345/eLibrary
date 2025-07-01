@@ -67,12 +67,16 @@
                                                 <p class="card-text text-xs"><strong>Category:</strong> {{ $book->category ? $book->category->name : 'N/A' }}</p>
                                                 <p class="card-text text-xs"><strong>ISBN:</strong> {{ $book->isbn }}</p>
                                                 <div class="action-buttons d-flex gap-2 mt-2">
-                                                    <button class="btn btn-sm btn-warning text-xs py-1 px-2 flex-grow-1" data-bs-toggle="modal" 
-                                                        data-bs-target="#editBookModal" data-book="{{ json_encode($book->toArray()) }}">
+                                                    <button class="btn btn-sm btn-warning text-xs py-1 px-2 flex-grow-1" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#editBookModal" 
+                                                            data-book="{{ json_encode($book->toArray()) }}"
+                                                            data-file-exists="{{ $book->file_path && Storage::disk('public')->exists($book->file_path) ? 'true' : 'false' }}"
+                                                            data-cover-exists="{{ $book->cover_image_path && Storage::disk('public')->exists($book->cover_image_path) ? 'true' : 'false' }}">
                                                         <i class="fas fa-edit"></i> Edit
                                                     </button>
                                                     <form action="{{ route('admin.books.destroy', $book) }}" method="POST" 
-                                                        class="d-inline" onsubmit="return confirm('Are you sure?')">
+                                                          class="d-inline" onsubmit="return confirm('Are you sure?')">
                                                         @csrf
                                                         @method('DELETE')
                                                         <button type="submit" class="btn btn-sm btn-danger text-xs py-1 px-2 flex-grow-1">
@@ -110,10 +114,11 @@
                 </div>
                 <div class="modal-body text-center">
                     <img id="enlargedCoverImage" src="#" alt="Book cover" class="modal-cover-img">
+                    <p id="noCoverMessage" class="text-muted text-xs mt-2" style="display: none;">No cover image available</p>
                 </div>
                 <div class="modal-footer">
                     <a id="viewPdfButton" href="#" class="btn btn-primary text-xs py-1 px-2" style="display: none;" target="_blank">
-                        <i class="fas fa-file-pdf me-1"></i>View PDF
+                        <i class="fas fa-file-pdf me-1"></i>View File
                     </a>
                     <button type="button" class="btn btn-secondary text-xs py-1 px-2" data-bs-dismiss="modal">
                         <i class="fas fa-arrow-left me-1"></i>Back
@@ -138,10 +143,16 @@
                         <div class="mb-2">
                             <label for="editTitle" class="form-label text-sm">Title</label>
                             <input type="text" class="form-control text-sm py-1 px-2" id="editTitle" name="title" required>
+                            @error('title')
+                                <div class="invalid-feedback text-xs">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-2">
                             <label for="editAuthor" class="form-label text-sm">Author</label>
                             <input type="text" class="form-control text-sm py-1 px-2" id="editAuthor" name="author" required>
+                            @error('author')
+                                <div class="invalid-feedback text-xs">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-2">
                             <label for="editCategory" class="form-label text-sm">Category</label>
@@ -151,24 +162,33 @@
                                     <option value="{{ $category->id }}">{{ $category->name }}</option>
                                 @endforeach
                             </select>
+                            @error('category_id')
+                                <div class="invalid-feedback text-xs">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-2">
                             <label for="editIsbn" class="form-label text-sm">ISBN</label>
                             <input type="text" class="form-control text-sm py-1 px-2" id="editIsbn" name="isbn" required>
+                            @error('isbn')
+                                <div class="invalid-feedback text-xs">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-2">
                             <label for="editBook" class="form-label text-sm">Book File (PDF, TXT, EPUB)</label>
                             <input type="file" class="form-control text-sm py-1" id="editBook" name="book_file" accept=".pdf,.txt,.epub">
-                            <p id="currentBook" class="mt-1 text-xs" style="display: none;">
-                                Current: <a href="#" id="currentBookLink" target="_blank">View file</a>
-                            </p>
+                            <p id="currentBookText" class="mt-1 text-xs"></p>
+                            @error('book_file')
+                                <div class="invalid-feedback text-xs">{{ $message }}</div>
+                            @enderror
                         </div>
                         <div class="mb-2">
                             <label for="editCoverImage" class="form-label text-sm">Book Cover (Image)</label>
                             <input type="file" class="form-control text-sm py-1" id="editCoverImage" name="cover_image" accept="image/*">
-                            <p id="currentCover" class="mt-1 text-xs" style="display: none;">
-                                <img id="currentCoverImage" src="#" alt="Current cover" class="current-cover-img">
-                            </p>
+                            <p id="currentCoverText" class="mt-1 text-xs"></p>
+                            <img id="currentCoverImage" src="#" alt="Current cover" class="current-cover-img" style="display: none;">
+                            @error('cover_image')
+                                <div class="invalid-feedback text-xs">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -335,12 +355,24 @@
         font-size: 0.875rem;
         padding: 0.5rem 0.75rem;
     }
+    .form-control.is-invalid {
+        border-color: #dc3545;
+    }
+    .invalid-feedback {
+        display: none;
+    }
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
     .btn {
         font-size: 0.875rem;
         padding: 0.5rem 0.75rem;
     }
     #searchInput {
         max-width: 200px;
+    }
+    .text-red-500 {
+        color: #dc3545;
     }
 
     /* Mobile (≤ 576px): 2 books per slide, 1 top, 1 bottom */
@@ -475,11 +507,21 @@
                 const title = this.getAttribute('data-title');
                 const filePath = this.getAttribute('data-file-path');
                 
-                document.getElementById('enlargedCoverImage').src = cover;
+                const enlargedCoverImage = document.getElementById('enlargedCoverImage');
+                const noCoverMessage = document.getElementById('noCoverMessage');
                 document.getElementById('viewCoverModalLabel').textContent = `Book Cover: ${title}`;
                 
+                if (cover) {
+                    enlargedCoverImage.src = cover;
+                    enlargedCoverImage.style.display = 'block';
+                    noCoverMessage.style.display = 'none';
+                } else {
+                    enlargedCoverImage.style.display = 'none';
+                    noCoverMessage.style.display = 'block';
+                }
+                
                 const pdfButton = document.getElementById('viewPdfButton');
-                if (filePath && filePath.endsWith('.pdf')) {
+                if (filePath && (filePath.endsWith('.pdf') || filePath.endsWith('.txt') || filePath.endsWith('.epub'))) {
                     pdfButton.style.display = 'inline-block';
                     pdfButton.href = filePath;
                 } else {
@@ -494,32 +536,49 @@
         document.getElementById('editBookModal').addEventListener('show.bs.modal', function (event) {
             const button = event.relatedTarget;
             const book = JSON.parse(button.getAttribute('data-book'));
+            const fileExists = button.getAttribute('data-file-exists') === 'true';
+            const coverExists = button.getAttribute('data-cover-exists') === 'true';
             const form = document.getElementById('editBookForm');
             
             form.action = `/admin/books/${book.id}`;
-            document.getElementById('editTitle').value = book.title;
+            document.getElementById('editTitle').value = book.title || '';
             document.getElementById('editAuthor').value = book.author || '';
-            document.getElementById('editIsbn').value = book.isbn;
+            document.getElementById('editIsbn').value = book.isbn || '';
             document.getElementById('editCategory').value = book.category_id || '';
-            
-            const currentBookText = document.getElementById('currentBook');
-            const currentBookLink = document.getElementById('currentBookLink');
-            const currentCoverText = document.getElementById('currentCover');
+
+            const currentBookText = document.getElementById('currentBookText');
+            const currentCoverText = document.getElementById('currentCoverText');
             const currentCoverImage = document.getElementById('currentCoverImage');
-            
-            if (book.file_path) {
-                currentBookText.style.display = 'block';
-                currentBookLink.href = `/storage/${book.file_path}`;
+
+            // Handle book file display
+            if (book.file_path && fileExists) {
+                currentBookText.innerHTML = `Current: <a href="/storage/${book.file_path}" target="_blank">View file</a>`;
+            } else if (book.file_path) {
+                currentBookText.innerHTML = `<span class="text-red-500">Invalid file path: ${book.file_path}</span>`;
             } else {
-                currentBookText.style.display = 'none';
+                currentBookText.innerHTML = 'No file uploaded';
             }
 
-            if (book.cover_image_path) {
-                currentCoverText.style.display = 'block';
+            // Handle cover image display
+            if (book.cover_image_path && coverExists) {
+                currentCoverText.innerHTML = 'Current cover:';
                 currentCoverImage.src = `/storage/${book.cover_image_path}`;
+                currentCoverImage.style.display = 'block';
+            } else if (book.cover_image_path) {
+                currentCoverText.innerHTML = `<span class="text-red-500">Invalid cover image path: ${book.cover_image_path}</span>`;
+                currentCoverImage.style.display = 'none';
             } else {
-                currentCoverText.style.display = 'none';
+                currentCoverText.innerHTML = 'No cover image uploaded';
+                currentCoverImage.style.display = 'none';
             }
+
+            console.log('Edit modal opened for book:', {
+                id: book.id,
+                file_path: book.file_path,
+                file_exists: fileExists,
+                cover_image_path: book.cover_image_path,
+                cover_exists: coverExists
+            });
         });
 
         // Handle add book button click
